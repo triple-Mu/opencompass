@@ -145,9 +145,11 @@ class LocalRunner(BaseRunner):
 
                 return res
 
-            with ThreadPoolExecutor(
-                    max_workers=self.max_num_workers) as executor:
-                status = executor.map(submit, tasks, range(len(tasks)))
+            # with ThreadPoolExecutor(
+            #         max_workers=self.max_num_workers) as executor:
+            #     status = executor.map(submit, tasks, range(len(tasks)))
+            for task in tasks:
+                status.append(submit(task, None))
 
         return status
 
@@ -165,7 +167,8 @@ class LocalRunner(BaseRunner):
 
         # Dump task config to file
         mmengine.mkdir_or_exist('tmp/')
-        param_file = f'tmp/{os.getpid()}_{index}_params.py'
+        _name = re.findall(r'.*?\[.*?\/(.*?)].*?', task.name)[0]
+        param_file = f'tmp/{_name}_params.py'
         try:
             task.cfg.dump(param_file)
             tmpl = get_command_template(gpu_ids)
@@ -181,16 +184,19 @@ class LocalRunner(BaseRunner):
             out_path = task.get_log_path(file_extension='out')
             mmengine.mkdir_or_exist(osp.split(out_path)[0])
             stdout = open(out_path, 'w', encoding='utf-8')
-
-            result = subprocess.run(cmd,
-                                    shell=True,
-                                    text=True,
-                                    stdout=stdout,
-                                    stderr=stdout)
+            print(f'\n{"*" * 100}\n{cmd}\n{"*" * 100}')
+            result = lambda: None
+            result.returncode = -1
+            # result = subprocess.run(cmd,
+            #                         shell=True,
+            #                         text=True,
+            #                         stdout=stdout,
+            #                         stderr=stdout)
 
             if result.returncode != 0:
                 logger.warning(f'task {task_name} fail, see\n{out_path}')
         finally:
             # Clean up
-            os.remove(param_file)
+            # os.remove(param_file)
+            pass
         return task_name, result.returncode

@@ -97,7 +97,8 @@ class SizePartitioner(BasePartitioner):
                     # skip the task if the task output exists
                     if osp.exists(filename):
                         continue
-                    dataset_size = self.get_cost(dataset)
+                    # dataset_size = self.get_cost(dataset)
+                    dataset_size = -1
                     if dataset_size > self.max_task_size:
                         root, ext = osp.splitext(filename)
                         dataset_splits = self.split_dataset(dataset)

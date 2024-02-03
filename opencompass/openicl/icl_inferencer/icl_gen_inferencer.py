@@ -197,6 +197,11 @@ class GenInferencer(BaseInferencer):
                 gen_field_replace_token=gen_field_replace_token,
                 ice_template=ice_template,
                 prompt_template=prompt_template)
+            print('*' * 100)
+            print(retriever.test_ds[idx]['input'])
+            print('-' * 100)
+            print(prompt[1].prompt)
+            print('*' * 100)
             if max_seq_len is not None:
                 prompt_token_num = self.model.get_token_len_from_template(
                     prompt, mode='gen')
